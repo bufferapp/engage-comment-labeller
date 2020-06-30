@@ -4,7 +4,21 @@ import numpy as np
 import pandas_gbq
 import copy
 
-@st.cache
+LABELS = [
+            'none',
+            'dont_know',
+            'positive',
+            'praise',
+            'negative',
+            'question',
+            'order',
+            'toxic',
+            'spam' ,
+            'private',
+            'mentions'
+        ]
+
+@st.cache(allow_output_mutation=True)
 def get_unlabelled_comments(comment_limit):
     with st.spinner('Getting unlabelled comments...'):
         query = f"""
@@ -37,32 +51,40 @@ def get_unlabelled_comments(comment_limit):
         """
         df = pd.read_gbq(query, project_id='buffer-data')
         df.set_index('id', drop=True, inplace=True)
-        for label in ['is_negative', 'is_question', 'is_order', 'is_toxic', 'dont_know']:
+        for label in LABELS:
             df[label] = False
         return df
 
 def save_labels(df):
+    if len(labeller_name) == 0:
+        st.error('Please select the Labeller Name!')
+        return
+    else:
+        df['labeller'] = labeller_name
+    df['labelled_at'] = pd.Timestamp.now()
     pandas_gbq.to_gbq(df
         , 'buffer_engage.comment_labels'
         , project_id='buffer-data'
         , if_exists='append')
-    st.caching.clear_cache()
 
-def set_label(label, id, value):
-    comments_df.loc[id][label] = value
+def set_label(df, label, id, value):
+    df.loc[id, label] = value
 
 comment_limit = st.sidebar.slider('Number of comments to load', 1, 50, 20)
 
-if st.sidebar.button('Reload'):
-    st.caching.clear_cache()
-
-comments_df = copy.deepcopy(get_unlabelled_comments(comment_limit))
+comments_df = get_unlabelled_comments(comment_limit)
 
 st.title('Engage Comment Labeller')
 
+labeller_name = st.text_input('Labeller Name:')
+
 if st.sidebar.button('Save Labels'):
     save_labels(comments_df)
+    st.caching.clear_cache()
+    comments_df = get_unlabelled_comments(comment_limit)
 
+if st.sidebar.button('Reload'):
+    st.caching.clear_cache()
 
 for comment_id, comment in comments_df.iterrows():
     st.markdown("## Post")
@@ -74,20 +96,9 @@ for comment_id, comment in comments_df.iterrows():
     st.markdown(comment['text'])
 
     st.markdown('## Labels')
-    negative = st.checkbox("NEGATIVE", key=f"neg-{comment_id}")
-    set_label('is_negative', comment_id, negative)
 
-    question = st.checkbox("QUESTION", key=f"question-{comment_id}")
-    set_label('is_question', comment_id, question)
-
-
-    order = st.checkbox("ORDER", key=f"ord-{comment_id}")
-    set_label('is_order', comment_id, question)
-
-    toxic = st.checkbox("TOXIC", key=f"toxic-{comment_id}")
-    set_label('is_toxic', comment_id, toxic)
-
-    dont_know = st.checkbox("DON'T KNOW", key=f"dont-know-{comment_id}")
-    set_label('dont_know', comment_id, toxic)
+    for label in LABELS:
+        value = st.checkbox(label.upper().replace('_', ' '), key=f"{label}-{comment_id}")
+        set_label(comments_df, label, comment_id, value)
 
     st.markdown('---')
