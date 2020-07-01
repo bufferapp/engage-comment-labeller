@@ -10,12 +10,17 @@ build:
 
 .PHONY: run
 run: build
-	@docker run --rm -it -p 8501:8501 --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME)
+	@docker run --rm -it -p 8080:8080 --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME)
 
 .PHONY: dev
 dev: build
-	@docker run --rm -it -p 8501:8501 --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME) /bin/bash
+	@docker run --rm -it -p 8080:8080 --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME) /bin/bash
 
-.PHONY: build
+.PHONY: push
 push: build
 	@docker push $(IMAGE_NAME)
+
+.PHONY: deploy
+deploy: build
+	@gcloud app deploy
+
