@@ -7,4 +7,4 @@ COPY app.py /app/app.py
 
 WORKDIR /app
 
-CMD ["streamlit", "run", "app.py"]
+CMD ["streamlit", "run", "--server.enableCORS", "false", "app.py"]
