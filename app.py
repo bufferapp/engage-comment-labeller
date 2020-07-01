@@ -46,7 +46,6 @@ def get_unlabelled_comments(comment_limit):
                 , c.* except (post_id)
             from comments c
                 inner join posts p on p.post_id = c.post_id
-            where c.labels != '[]'
             order by rand()
             limit {comment_limit}
         """
@@ -72,39 +71,41 @@ def save_labels(df):
 def set_label(df, label, id, value):
     df.loc[id, label] = value
 
-
-comment_limit = st.sidebar.slider("Number of comments to load", 1, 50, 20)
-
-comments_df = get_unlabelled_comments(comment_limit)
-
 st.title("Engage Comment Labeller")
 
 labeller_name = st.text_input("Labeller Name:")
+if len(labeller_name) > 0:
 
-if st.sidebar.button("Save Labels"):
-    save_labels(comments_df)
-    st.caching.clear_cache()
+    #Load comments and make the sidebar
+    comment_limit = st.sidebar.slider("Number of comments to load", 1, 50, 20)
     comments_df = get_unlabelled_comments(comment_limit)
 
-if st.sidebar.button("Reload"):
-    st.caching.clear_cache()
+    if st.sidebar.button("Save Labels"):
+        save_labels(comments_df)
+        st.caching.clear_cache()
+        comments_df = get_unlabelled_comments(comment_limit)
 
-for comment_id, comment in comments_df.iterrows():
-    st.markdown("## Post")
-    st.markdown(f"[Link]({comment['post_permalink']})")
-    st.image(comment["post_media_url"], width=640)
-    st.markdown(f"**Caption** {comment['post_caption']}")
+    if st.sidebar.button("Reload"):
+        st.caching.clear_cache()
+        comments_df = get_unlabelled_comments(comment_limit)
 
-    st.markdown("## Comment")
-    st.markdown(comment["text"])
+    # Load sample commments
+    for comment_id, comment in comments_df.iterrows():
+        st.markdown("## Post")
+        st.markdown(f"[Link]({comment['post_permalink']})")
+        st.image(comment["post_media_url"], width=640)
+        st.markdown(f"**Caption** {comment['post_caption']}")
 
-    st.markdown("## Labels")
+        st.markdown("## Comment")
+        st.markdown(comment["text"])
 
-    for label in LABELS:
-        value = st.checkbox(
-            label.upper().replace("_", " "), key=f"{label}-{comment_id}"
-        )
-        set_label(comments_df, label, comment_id, value)
+        st.markdown("## Labels")
 
-    st.markdown("---")
+        for label in LABELS:
+            value = st.checkbox(
+                label.upper().replace("_", " "), key=f"{label}-{comment_id}"
+            )
+            set_label(comments_df, label, comment_id, value)
+
+        st.markdown("---")
 
