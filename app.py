@@ -82,6 +82,12 @@ def set_label(df, label, id, value):
 
 st.title("Engage Comment Labeller")
 
+#instructional video
+if st.button("View Instructional Video"):
+    st.markdown("""
+    <div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/635d25e54c824d4397dbb3244b19724a" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+    """, unsafe_allow_html=True)
+
 labeller_name = st.text_input("Labeller Name:")
 if labeller_name == 'admin':
     admin_df = get_admin_data()
