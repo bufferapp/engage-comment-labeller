@@ -17,9 +17,10 @@ LABELS = [
     "spam",
     "private",
     "mentions",
+    "hashtags"
 ]
 
-
+#app functions
 @st.cache(allow_output_mutation=True)
 def get_unlabelled_comments(comment_limit):
     with st.spinner("Getting unlabelled comments..."):
