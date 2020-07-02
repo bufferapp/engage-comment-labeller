@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-IMAGE_NAME := gcr.io/buffer-data/engage-comment-labeller:0.3.1
+IMAGE_NAME := gcr.io/buffer-data/engage-comment-labeller:0.3.2
 
 GCLOUD_CONFIG_FLAG = -v $(HOME)/.config/gcloud/:/root/.config/gcloud
 
