@@ -26,7 +26,7 @@ LABELS = [
 
 #app functions
 @st.cache(allow_output_mutation=True)
-def get_unlabelled_comments(comment_limit):
+def get_unlabelled_comments(comment_limit, labeller_name):
     with st.spinner("Getting unlabelled comments..."):
         query = f"""
             with comments as (
@@ -54,6 +54,9 @@ def get_unlabelled_comments(comment_limit):
             from comments c
                 inner join posts p on p.post_id = c.post_id
             where p.type = 'IMAGE' -- we only support image posts for now
+                and comment_id not in (
+                    select comment_id from buffer_engage.comment_labels where labeller != '{labeller_name}'
+                )
             order by rand()
             limit {comment_limit}
         """
@@ -167,16 +170,16 @@ elif len(labeller_name) > 0:
 
     #Load comments and make the sidebar
     comment_limit = st.sidebar.slider("Number of comments to load", 1, 50, 20)
-    comments_df = get_unlabelled_comments(comment_limit)
+    comments_df = get_unlabelled_comments(comment_limit, labeller_name)
 
     if st.sidebar.button("Save Labels"):
         save_labels(comments_df)
         st.caching.clear_cache()
-        comments_df = get_unlabelled_comments(comment_limit)
+        comments_df = get_unlabelled_comments(comment_limit, labeller_name)
 
     if st.sidebar.button("Reload"):
         st.caching.clear_cache()
-        comments_df = get_unlabelled_comments(comment_limit)
+        comments_df = get_unlabelled_comments(comment_limit, labeller_name)
 
     # Load sample commments
     for comment_id, comment in comments_df.iterrows():
