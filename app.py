@@ -88,7 +88,8 @@ nl_client = language.LanguageServiceClient()
 
 @dataclass
 class CommentLabelsData:
-    df: pd.DataFrame
+    raw_df: pd.DataFrame
+    labellers_df: pd.DataFrame
     comments_labelled: int
     labellers: int
 
@@ -117,7 +118,9 @@ def get_comment_labels_data():
     df = pd.read_gbq(query, project_id="buffer-data")
     comments_labelled = df['comment_id'].nunique()
     labellers =  df['labeller'].nunique()
-    return CommentLabelsData(df, comments_labelled, labellers)
+    labellers_df = df.groupby(['labeller']).size().reset_index(name='counts')
+
+    return CommentLabelsData(df, labellers_df, comments_labelled, labellers)
 
 @st.cache
 def calculate_negativity_stats(df, threshold=-0.7):
@@ -157,14 +160,18 @@ if labeller_name == 'admin':
 
     st.text(f'Total # of comments labelled: {comment_labels_data.comments_labelled}')
     st.text(f'Total # of labellers: {comment_labels_data.labellers}')
+    "## Labeller stats"
+    comment_labels_data.labellers_df
+
     "## Raw data"
-    comment_labels_data.df
+    comment_labels_data.raw_df
 
     if st.button('Calculate Negativity Stats'):
         "### Negativity Stats"
-        stats = calculate_negativity_stats(comment_labels_data.df)
+        stats = calculate_negativity_stats(comment_labels_data.raw_df)
         stats.df
         stats.stats
+    "*This takes a while to run if not cached!*"
 
 elif len(labeller_name) > 0:
 
