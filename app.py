@@ -4,6 +4,10 @@ import numpy as np
 import pandas_gbq
 import copy
 import uuid
+from dataclasses import dataclass
+from google.cloud import language
+from google.cloud.language import types, enums
+from sklearn import metrics
 
 LABELS = [
     "none",
@@ -59,10 +63,6 @@ def get_unlabelled_comments(comment_limit):
             df[label] = False
         return df
 
-def get_admin_data():
-    query = "select * from buffer_engage.comment_labels"
-    return pd.read_gbq(query, project_id="buffer-data")
-
 def save_labels(df):
     if len(labeller_name) == 0:
         st.error("Please select the Labeller Name!")
@@ -77,9 +77,68 @@ def save_labels(df):
         df, "buffer_engage.comment_labels", project_id="buffer-data", if_exists="append"
     )
 
-
 def set_label(df, label, id, value):
     df.loc[id, label] = value
+
+#admin functions
+nl_client = language.LanguageServiceClient()
+
+@dataclass
+class CommentLabelsData:
+    df: pd.DataFrame
+    comments_labelled: int
+    labellers: int
+
+@dataclass
+class NegativityStatsData:
+    df: pd.DataFrame
+    stats: pd.DataFrame
+
+
+st.cache(show_spinner=False)
+def predict_negative(text):
+    from google.api_core.exceptions import InvalidArgument
+    try:
+        document = types.Document(
+            content=text,
+            type=enums.Document.Type.PLAIN_TEXT)
+        sentiment = nl_client.analyze_sentiment(document=document).document_sentiment
+        return sentiment
+    except InvalidArgument as e:
+        return language.types.Sentiment()
+
+
+@st.cache(allow_output_mutation=True)
+def get_comment_labels_data():
+    query = "select * from buffer_engage.comment_labels"
+    df = pd.read_gbq(query, project_id="buffer-data")
+    comments_labelled = df['comment_id'].nunique()
+    labellers =  df['labeller'].nunique()
+    return CommentLabelsData(df, comments_labelled, labellers)
+
+@st.cache
+def calculate_negativity_stats(df, threshold=-0.7):
+    output_df = copy.deepcopy(df)
+    predictions = output_df['text'].map(predict_negative)
+
+    output_df['sentiment_score'] = predictions.map(lambda p: p.score)
+    output_df['negative_prediction'] = output_df['sentiment_score'].map(lambda s: s < threshold)
+
+    n_actual = len(output_df[output_df['negative']])
+    n_predicted = len(output_df[output_df['negative_prediction']])
+    precision = metrics.precision_score(output_df['negative'], output_df['negative_prediction'])
+    recall = metrics.recall_score(output_df['negative'], output_df['negative_prediction'])
+    f1_score = metrics.f1_score(output_df['negative'], output_df['negative_prediction'])
+
+    output_df = output_df[['id', 'text', 'negative', 'sentiment_score', 'negative_prediction']]
+
+    stats = pd.DataFrame({'actual': [n_actual],
+        'predicted': [n_predicted],
+        'precision': [precision],
+        'recall': [recall],
+        'f1_score': [f1_score]})
+
+    return NegativityStatsData(output_df, stats)
 
 st.title("Engage Comment Labeller")
 
@@ -91,14 +150,18 @@ if st.button("View Instructional Video"):
 
 labeller_name = st.text_input("Labeller Name:")
 if labeller_name == 'admin':
-    admin_df = get_admin_data()
-    comments_labelled = admin_df['comment_id'].nunique()
-    labellers =  admin_df['labeller'].nunique()
+    comment_labels_data = get_comment_labels_data()
 
-    st.text(f'Total # of comments labelled: {comments_labelled}')
-    st.text(f'Total # of labellers: {labellers}')
+    st.text(f'Total # of comments labelled: {comment_labels_data.comments_labelled}')
+    st.text(f'Total # of labellers: {comment_labels_data.labellers}')
     "## Raw data"
-    admin_df
+    comment_labels_data.df
+
+    if st.button('Calculate Negativity Stats'):
+        "### Negativity Stats"
+        stats = calculate_negativity_stats(comment_labels_data.df)
+        stats.df
+        stats.stats
 
 elif len(labeller_name) > 0:
 
