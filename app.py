@@ -21,7 +21,8 @@ LABELS = [
     "spam",
     "private",
     "mentions",
-    "hashtags"
+    "hashtags",
+    "giveaway"
 ]
 
 #app functions
