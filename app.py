@@ -27,8 +27,13 @@ LABELS = [
 
 #app functions
 @st.cache(allow_output_mutation=True)
-def get_unlabelled_comments(comment_limit, labeller_name):
+def get_unlabelled_comments(comment_limit, labeller_name, sample_from):
     with st.spinner("Getting unlabelled comments..."):
+        if sample_from == 'negative':
+            sample_from_clause = "comment_id in (select id from `buffer_engage.potentially_negative_comments`)"
+        else:
+            sample_from_clause = 'true'
+
         query = f"""
             with comments as (
                 select
@@ -58,6 +63,7 @@ def get_unlabelled_comments(comment_limit, labeller_name):
                 and comment_id not in (
                     select comment_id from buffer_engage.comment_labels where labeller != '{labeller_name}'
                 )
+                and {sample_from_clause}
             order by rand()
             limit {comment_limit}
         """
@@ -176,18 +182,26 @@ if labeller_name == 'admin':
 
 elif len(labeller_name) > 0:
 
+    sample_from = st.sidebar.selectbox(
+        "Which data should be sample?",
+        ('all', 'negative'),
+        format_func=lambda o: 'All' if o == 'all' else 'Potentially Negative'
+    )
+
     #Load comments and make the sidebar
     comment_limit = st.sidebar.slider("Number of comments to load", 1, 50, 20)
-    comments_df = get_unlabelled_comments(comment_limit, labeller_name)
+    comments_df = get_unlabelled_comments(comment_limit, labeller_name, sample_from)
 
     if st.sidebar.button("Save Labels"):
         save_labels(comments_df)
         st.caching.clear_cache()
-        comments_df = get_unlabelled_comments(comment_limit, labeller_name)
+        comments_df = get_unlabelled_comments(comment_limit, labeller_name, sample_from)
 
     if st.sidebar.button("Reload"):
         st.caching.clear_cache()
-        comments_df = get_unlabelled_comments(comment_limit, labeller_name)
+        comments_df = get_unlabelled_comments(comment_limit, labeller_name, sample_from)
+
+
 
     # Load sample commments
     for comment_id, comment in comments_df.iterrows():
