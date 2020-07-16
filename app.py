@@ -43,6 +43,7 @@ def get_unlabelled_comments(comment_limit, labeller_name, sample_from):
                     , text
                     , labels
                 from `atlas_engage_engage.comments`
+                where {sample_from_clause}
             )
             , posts as (
                 select
@@ -63,7 +64,6 @@ def get_unlabelled_comments(comment_limit, labeller_name, sample_from):
                 and comment_id not in (
                     select comment_id from buffer_engage.comment_labels where labeller != '{labeller_name}'
                 )
-                and {sample_from_clause}
             order by rand()
             limit {comment_limit}
         """
@@ -173,12 +173,15 @@ if labeller_name == 'admin':
     "## Raw data"
     comment_labels_data.raw_df
 
-    if st.button('Calculate Negativity Stats'):
-        "### Negativity Stats"
-        stats = calculate_negativity_stats(comment_labels_data.raw_df)
-        stats.df
-        stats.stats
-    "*This takes a while to run if not cached!*"
+    "## Label Breakdown"
+    breakdown = (comment_labels_data.raw_df[LABELS] == True).sum()
+    breakdown
+    # if st.button('Calculate Negativity Stats'):
+    #     "### Negativity Stats"
+    #     stats = calculate_negativity_stats(comment_labels_data.raw_df)
+    #     stats.df
+    #     stats.stats
+    # "*This takes a while to run if not cached!*"
 
 elif len(labeller_name) > 0:
 
