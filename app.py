@@ -30,7 +30,7 @@ LABELS = [
 def get_unlabelled_comments(comment_limit, labeller_name, sample_from):
     with st.spinner("Getting unlabelled comments..."):
         if sample_from == 'negative':
-            sample_from_clause = "comment_id in (select id from `buffer_engage.potentially_negative_comments`)"
+            sample_from_clause = "_id in (select id from `buffer_engage.comment_nl_api_sentiment` where sentiment_score is not null order by sentiment_score limit 1000)"
         else:
             sample_from_clause = 'true'
 
