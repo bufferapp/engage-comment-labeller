@@ -1,0 +1,30 @@
+{
+  "completions": [
+    {
+      "created_at": 1606832744,
+      "id": 1,
+      "lead_time": 6.345,
+      "result": [
+        {
+          "from_name": "sentiment",
+          "id": "dzlwA4Pzbx",
+          "to_name": "text",
+          "type": "choices",
+          "value": {
+            "choices": [
+              "Not Negative"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "data": {
+    "comment_id": "instagram_17956782805335119_17945248084359780",
+    "created_at": "2020-06-24 09:51:13 UTC",
+    "is_negative": false,
+    "post_id": "instagram_17956782805335119",
+    "text": "@josecanizarest \ud83d\ude46\ud83c\udffd\ud83d\ude46\ud83c\udffd\ud83d\ude46\ud83c\udffd\ud83d\ude46\ud83c\udffd\ud83d\ude46\ud83c\udffd\ud83d\ude46\ud83c\udffd"
+  },
+  "id": 0
+}

@@ -1,0 +1,30 @@
+{
+  "completions": [
+    {
+      "created_at": 1606832753,
+      "id": 8001,
+      "lead_time": 0.666,
+      "result": [
+        {
+          "from_name": "sentiment",
+          "id": "lvSpu150oC",
+          "to_name": "text",
+          "type": "choices",
+          "value": {
+            "choices": [
+              "Not Negative"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "data": {
+    "comment_id": "instagram_17861685445720858_17870448832580290",
+    "created_at": "2020-02-10 15:48:55 UTC",
+    "is_negative": false,
+    "post_id": "instagram_17861685445720858",
+    "text": "@katie.comiskey"
+  },
+  "id": 8
+}

@@ -1,0 +1,35 @@
+{
+    "title": "Engage Label Studio",
+    "description": "Engage Labeling Tool",
+    "protocol": "http://",
+    "host": "0.0.0.0",
+    "port": 8080,
+    "username": "engage",
+    "password": "buffer",
+    "debug": false,
+    "label_config": "/project/engage-labels/config.xml",
+    "input_path": "/project/engage-labels/tasks.json",
+    "output_dir": "/project/engage-labels/completions",
+    "instruction": "<img src='static/images/ls_logo.png'><br> Type some <b>hypertext</b> for annotators here!<br> <a href='https://labelstud.io/guide/labeling.html'>Read more</a> about the labeling interface.",
+    "allow_delete_completions": true,
+    "templates_dir": "examples",
+    "editor": {
+        "debug": false
+    },
+    "sampling": "sequential",
+    "ml_backends": [],
+    "task_page_auto_update_timer": 10000,
+    "show_project_links_in_multisession": true,
+    "source": {
+        "name": "Tasks",
+        "type": "tasks-json",
+        "path": "/project/engage-labels/tasks.json"
+    },
+    "target": {
+        "name": "Completions",
+        "type": "completions-dir",
+        "path": "/project/engage-labels/completions"
+    },
+    "config_path": "/project/engage-labels/config.json",
+    "label_config_updated": true
+}

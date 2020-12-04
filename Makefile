@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-IMAGE_NAME := gcr.io/buffer-data/engage-comment-labeller:0.6.1
+IMAGE_NAME := gcr.io/buffer-data/label-studio-engage:1.0.0
 
 GCLOUD_CONFIG_FLAG = -v $(HOME)/.config/gcloud/:/root/.config/gcloud
 
@@ -14,7 +14,7 @@ run: build
 
 .PHONY: dev
 dev: build
-	@docker run --rm -it -p 8080:8080 --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME) /bin/bash
+	@docker run --rm -it -p 8080:8080 -v $(PWD):/project --env-file=.env $(GCLOUD_CONFIG_FLAG) $(IMAGE_NAME) /bin/bash
 
 .PHONY: push
 push: build
@@ -23,4 +23,3 @@ push: build
 .PHONY: deploy
 deploy: build
 	@gcloud app deploy
-

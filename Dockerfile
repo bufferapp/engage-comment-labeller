@@ -1,12 +1,7 @@
-FROM python:3.7.2
+FROM heartexlabs/label-studio:latest
 
-EXPOSE 8080
+COPY engage-labels /project/engage-labels
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+WORKDIR /project
 
-COPY app.py /app/app.py
-
-WORKDIR /app
-
-CMD ["streamlit", "run", "--server.port", "8080", "--server.enableCORS", "false", "app.py"]
+CMD ["label-studio", "start", "engage-labels", "--use-gevent"]
