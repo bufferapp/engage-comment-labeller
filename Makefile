@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-IMAGE_NAME := gcr.io/buffer-data/label-studio-engage:1.0.0
+IMAGE_NAME := gcr.io/buffer-data/label-studio-engage:1.0.2
 
 GCLOUD_CONFIG_FLAG = -v $(HOME)/.config/gcloud/:/root/.config/gcloud
 
@@ -21,5 +21,5 @@ push: build
 	@docker push $(IMAGE_NAME)
 
 .PHONY: deploy
-deploy: build
-	@gcloud app deploy
+deploy: push
+	@gcloud beta run services replace service.yaml --platform managed --region us-central1

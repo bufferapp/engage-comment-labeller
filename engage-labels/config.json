@@ -1,5 +1,5 @@
 {
-    "title": "Engage Label Studio",
+    "title": "Engage Labels",
     "description": "Engage Labeling Tool",
     "protocol": "http://",
     "host": "0.0.0.0",
@@ -7,9 +7,9 @@
     "username": "engage",
     "password": "buffer",
     "debug": false,
-    "label_config": "/project/engage-labels/config.xml",
-    "input_path": "/project/engage-labels/tasks.json",
-    "output_dir": "/project/engage-labels/completions",
+    "label_config": "config.xml",
+    "input_path": null,
+    "output_dir": "completions",
     "instruction": "<img src='static/images/ls_logo.png'><br> Type some <b>hypertext</b> for annotators here!<br> <a href='https://labelstud.io/guide/labeling.html'>Read more</a> about the labeling interface.",
     "allow_delete_completions": true,
     "templates_dir": "examples",
@@ -21,15 +21,20 @@
     "task_page_auto_update_timer": 10000,
     "show_project_links_in_multisession": true,
     "source": {
-        "name": "Tasks",
-        "type": "tasks-json",
-        "path": "/project/engage-labels/tasks.json"
+        "type": "gcs",
+        "path": "engage-labels",
+        "params": {
+            "use_blob_urls": false,
+            "prefix": "label-studio/raw",
+            "regex": ".*"
+        }
     },
     "target": {
-        "name": "Completions",
-        "type": "completions-dir",
-        "path": "/project/engage-labels/completions"
+        "type": "gcs-completions",
+        "path": "engage-labels",
+        "params": {
+            "prefix": "label-studio/completions"
+        }
     },
-    "config_path": "/project/engage-labels/config.json",
     "label_config_updated": true
 }
