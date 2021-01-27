@@ -1,4 +1,6 @@
-FROM heartexlabs/label-studio:0.8.2.post0
+FROM heartexlabs/label-studio:0.9.0
+
+RUN pip install label-studio==0.9.0.post5
 
 COPY engage-labels /project/engage-labels
 
