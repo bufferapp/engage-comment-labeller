@@ -1,12 +1,16 @@
-FROM python:3.7.2
+FROM heartexlabs/label-studio:0.9.0
 
-EXPOSE 8080
+RUN pip install label-studio==0.9.0.post5
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY engage-labels /project/engage-labels
 
-COPY app.py /app/app.py
+WORKDIR /project
 
-WORKDIR /app
+CMD ["label-studio", "start", "engage-labels", "--use-gevent"]
 
-CMD ["streamlit", "run", "--server.port", "8080", "--server.enableCORS", "false", "app.py"]
+# label-studio start engage-labels/ --init \
+#     --source gcs --source-path engage-labels --input-format json \
+#     --target gcs-completions --target-path engage-labels \
+#     --force --log-level DEBUG \
+#     --source-params '{"use_blob_urls": false, "prefix": "label-studio/raw", "regex": ".*"}' \
+#     --target-params '{"prefix": "label-studio/completions"}'
